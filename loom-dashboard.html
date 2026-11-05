@@ -1,0 +1,557 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOOM Dashboard</title>
+    <style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; }
+body.dark-mode { background: #1e1e1e; color: #e0e0e0; }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid #007bff; padding-bottom: 20px; }
+.header h1 { font-size: 28px; color: #007bff; }
+.header .controls { display: flex; gap: 10px; }
+.btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
+.btn-primary { background: #007bff; color: white; }
+.btn-primary:hover { background: #0056b3; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-secondary:hover { background: #545b62; }
+.btn-success { background: #28a745; color: white; }
+.btn-success:hover { background: #218838; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-danger:hover { background: #c82333; }
+.btn-small { padding: 6px 12px; font-size: 12px; }
+
+.tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #ddd; }
+.dark-mode .tabs { border-bottom-color: #444; }
+.tab-btn { padding: 12px 20px; background: transparent; border: none; cursor: pointer; font-weight: 600; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s; }
+.dark-mode .tab-btn { color: #aaa; }
+.tab-btn.active { color: #007bff; border-bottom-color: #007bff; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.dark-mode .card { background: #2d2d2d; }
+.card-header { font-size: 16px; font-weight: 600; margin-bottom: 15px; }
+.card-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+.form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+.dark-mode .form-group input, .dark-mode .form-group textarea, .dark-mode .form-group select { background: #3d3d3d; border-color: #555; color: #e0e0e0; }
+.form-group textarea { min-height: 100px; resize: vertical; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.status-badge { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+.badge-decide { background: #ffc107; color: #333; }
+.badge-review { background: #17a2b8; color: white; }
+.badge-log { background: #6c757d; color: white; }
+.badge-pending { background: #ff6b6b; color: white; }
+.badge-approved { background: #28a745; color: white; }
+.badge-rejected { background: #dc3545; color: white; }
+
+.token-input { background: #f8f9fa; border: 1px dashed #ddd; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+.dark-mode .token-input { background: #3d3d3d; border-color: #555; }
+.token-masked { font-family: monospace; }
+
+.intent-card { border-left: 4px solid #007bff; padding: 15px; margin-bottom: 10px; background: #f8f9fa; border-radius: 4px; }
+.dark-mode .intent-card { background: #3d3d3d; }
+.intent-card.tier-decide { border-left-color: #ffc107; }
+.intent-card.tier-review { border-left-color: #17a2b8; }
+.intent-card.tier-log { border-left-color: #6c757d; }
+
+.modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; }
+.modal.show { display: flex; }
+.modal-content { background: white; padding: 30px; border-radius: 8px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; }
+.dark-mode .modal-content { background: #2d2d2d; }
+.modal-header { font-size: 22px; font-weight: 600; margin-bottom: 20px; }
+.modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+.approval-item { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
+.dark-mode .approval-item { border-color: #555; }
+.approval-content { margin-bottom: 15px; }
+.approval-actions { display: flex; gap: 10px; }
+
+.project-tile { background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff; margin-bottom: 15px; }
+.dark-mode .project-tile { background: #2d2d2d; }
+.project-tile.active { border-left-color: #28a745; }
+.project-tile.completed { border-left-color: #6c757d; opacity: 0.7; }
+
+.loading { text-align: center; padding: 20px; }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #007bff; border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.alert { padding: 15px; border-radius: 6px; margin-bottom: 15px; }
+.alert-info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+.alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+.alert-danger { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+.dark-mode .alert { border-color: #555; }
+.dark-mode .alert-info { background: #1a4f5a; color: #a0d5d9; }
+.dark-mode .alert-success { background: #1a4f2a; color: #8bc98b; }
+.dark-mode .alert-danger { background: #4a1a1a; color: #d98a8a; }
+
+@media (max-width: 768px) {
+    .header { flex-direction: column; gap: 15px; }
+    .tabs { flex-wrap: wrap; }
+    .grid { grid-template-columns: 1fr; }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 LOOM Dashboard</h1>
+            <div class="controls">
+                <button class="btn btn-secondary btn-small" id="themeToggle">🌙 Dark</button>
+                <button class="btn btn-primary btn-small" id="settingsBtn">⚙️ Settings</button>
+                <button class="btn btn-secondary btn-small" id="refreshBtn">🔄 Sync</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('intent')">Submit Intent</button>
+            <button class="tab-btn" onclick="switchTab('approvals')">Approvals</button>
+            <button class="tab-btn" onclick="switchTab('briefing')">Monday Brief</button>
+            <button class="tab-btn" onclick="switchTab('projects')">Projects</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div id="dashboardAlerts"></div>
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">Pending (DECIDE)</div>
+                    <div id="decidePending"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Pending (REVIEW)</div>
+                    <div id="reviewPending"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">Pending (LOG)</div>
+                    <div id="logPending"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">Recent Activity</div>
+                <div id="recentActivity"></div>
+            </div>
+        </div>
+
+        <!-- Submit Intent Tab -->
+        <div id="intent" class="tab-content">
+            <div class="card">
+                <div class="card-title">Submit Intent Card</div>
+                <form id="intentForm">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" id="intentTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description *</label>
+                        <textarea id="intentDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Room *</label>
+                        <select id="intentRoom" required>
+                            <option value="">-- Select Room --</option>
+                            <option value="SPIN">SPIN</option>
+                            <option value="PATTERN">PATTERN</option>
+                            <option value="WARP">WARP</option>
+                            <option value="WEAVE">WEAVE</option>
+                            <option value="HARVEST">HARVEST</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tier *</label>
+                        <select id="intentTier" required>
+                            <option value="">-- Select Tier --</option>
+                            <option value="DECIDE">DECIDE (Decision required)</option>
+                            <option value="REVIEW">REVIEW (Information sharing)</option>
+                            <option value="LOG">LOG (Record keeping)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Purpose *</label>
+                        <textarea id="intentPurpose" required placeholder="Why are we doing this?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>End State *</label>
+                        <textarea id="intentEndState" required placeholder="What does success look like?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Constraints</label>
+                        <textarea id="intentConstraints" placeholder="Any limitations or constraints?"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Intent Card</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Approvals Tab -->
+        <div id="approvals" class="tab-content">
+            <div id="approvalsAlerts"></div>
+            <div id="approvalsList"></div>
+        </div>
+
+        <!-- Monday Brief Tab -->
+        <div id="briefing" class="tab-content">
+            <div class="card">
+                <div class="card-title">Monday Briefing</div>
+                <div id="briefingContent"></div>
+            </div>
+        </div>
+
+        <!-- Projects Tab -->
+        <div id="projects" class="tab-content">
+            <div class="card">
+                <div class="card-title">Active Projects & Strategy</div>
+                <div id="projectsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Settings</div>
+            <div class="form-group">
+                <label>GitHub Repository URL</label>
+                <input type="text" id="repoUrl" placeholder="e.g., WalkerJustin/loom">
+            </div>
+            <div class="form-group">
+                <label>GitHub Personal Access Token</label>
+                <div class="token-input">
+                    <div style="margin-bottom: 10px; font-size: 12px; color: #666;">
+                        🔒 Token stored locally only. Never sent anywhere else.
+                    </div>
+                    <input type="password" id="githubToken" placeholder="ghp_...">
+                    <div style="margin-top: 10px; font-size: 12px;">
+                        <a href="https://github.com/settings/tokens" target="_blank">Create token on GitHub</a> (needs repo, workflow scopes)
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="notifyEnabled"> Enable notifications
+                </label>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="autoRefresh"> Auto-refresh (every 5 min)
+                </label>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+// Global state
+let config = {
+    repoUrl: 'WalkerJustin/loom',
+    githubToken: '',
+    notifyEnabled: true,
+    autoRefresh: true,
+    darkMode: false
+};
+
+let appData = {
+    intentions: [],
+    issues: [],
+    projects: []
+};
+
+// Load config on startup
+function loadConfig() {
+    const stored = localStorage.getItem('loomConfig');
+    if (stored) {
+        config = { ...config, ...JSON.parse(stored) };
+    }
+    if (config.darkMode) {
+        document.body.classList.add('dark-mode');
+    }
+}
+
+// Save config to localStorage
+function saveConfig() {
+    localStorage.setItem('loomConfig', JSON.stringify(config));
+}
+
+// Tab switching
+function switchTab(tabName) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+    
+    if (tabName === 'dashboard') loadDashboard();
+    if (tabName === 'approvals') loadApprovals();
+    if (tabName === 'briefing') loadMonday Brief();
+    if (tabName === 'projects') loadProjects();
+}
+
+// Theme toggle
+document.getElementById('themeToggle').addEventListener('click', () => {
+    config.darkMode = !config.darkMode;
+    document.body.classList.toggle('dark-mode');
+    saveConfig();
+});
+
+// Settings
+document.getElementById('settingsBtn').addEventListener('click', () => {
+    document.getElementById('repoUrl').value = config.repoUrl;
+    document.getElementById('githubToken').value = config.githubToken;
+    document.getElementById('notifyEnabled').checked = config.notifyEnabled;
+    document.getElementById('autoRefresh').checked = config.autoRefresh;
+    document.getElementById('settingsModal').classList.add('show');
+});
+
+function closeSettings() {
+    document.getElementById('settingsModal').classList.remove('show');
+}
+
+function saveSettings() {
+    config.repoUrl = document.getElementById('repoUrl').value;
+    config.githubToken = document.getElementById('githubToken').value;
+    config.notifyEnabled = document.getElementById('notifyEnabled').checked;
+    config.autoRefresh = document.getElementById('autoRefresh').checked;
+    saveConfig();
+    closeSettings();
+    showAlert('Settings saved!', 'success', 'dashboardAlerts');
+}
+
+// GitHub API
+async function githubAPI(endpoint, method = 'GET', body = null) {
+    if (!config.githubToken) {
+        showAlert('GitHub token not configured', 'danger', 'dashboardAlerts');
+        return null;
+    }
+    
+    const url = `https://api.github.com${endpoint}`;
+    const options = {
+        method,
+        headers: {
+            'Authorization': `token ${config.githubToken}`,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    };
+    
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
+    
+    try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+            throw new Error(`GitHub API error: ${response.status}`);
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('GitHub API call failed:', error);
+        return null;
+    }
+}
+
+// Submit intent form
+document.getElementById('intentForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const title = document.getElementById('intentTitle').value;
+    const description = document.getElementById('intentDescription').value;
+    const room = document.getElementById('intentRoom').value;
+    const tier = document.getElementById('intentTier').value;
+    const purpose = document.getElementById('intentPurpose').value;
+    const endState = document.getElementById('intentEndState').value;
+    const constraints = document.getElementById('intentConstraints').value;
+    
+    const body = `## Intent Card
+**Room:** ${room}
+**Tier:** ${tier}
+
+### Purpose
+${purpose}
+
+### Description
+${description}
+
+### End State
+${endState}
+
+### Constraints
+${constraints || 'None'}
+
+---
+*Submitted via LOOM Dashboard*`;
+    
+    const issue = await githubAPI('/repos/' + config.repoUrl + '/issues', 'POST', {
+        title: title,
+        body: body,
+        labels: ['tier:' + tier.toLowerCase(), 'room:' + room.toLowerCase(), 'intent-card']
+    });
+    
+    if (issue) {
+        showAlert('Intent Card submitted! Issue #' + issue.number, 'success', 'approvalsAlerts');
+        document.getElementById('intentForm').reset();
+    } else {
+        showAlert('Failed to submit Intent Card', 'danger', 'approvalsAlerts');
+    }
+});
+
+// Load dashboard
+async function loadDashboard() {
+    const issues = await githubAPI('/repos/' + config.repoUrl + '/issues');
+    if (!issues) return;
+    
+    const decidePending = issues.filter(i => i.labels.some(l => l.name === 'tier:decide'));
+    const reviewPending = issues.filter(i => i.labels.some(l => l.name === 'tier:review'));
+    const logPending = issues.filter(i => i.labels.some(l => l.name === 'tier:log'));
+    
+    document.getElementById('decidePending').innerHTML = decidePending.length > 0 
+        ? decidePending.map(i => `<div class="intent-card tier-decide"><strong>#${i.number}:</strong> ${i.title}</div>`).join('')
+        : '<p style="color: #999;">No pending items</p>';
+    
+    document.getElementById('reviewPending').innerHTML = reviewPending.length > 0 
+        ? reviewPending.map(i => `<div class="intent-card tier-review"><strong>#${i.number}:</strong> ${i.title}</div>`).join('')
+        : '<p style="color: #999;">No pending items</p>';
+    
+    document.getElementById('logPending').innerHTML = logPending.length > 0 
+        ? logPending.map(i => `<div class="intent-card tier-log"><strong>#${i.number}:</strong> ${i.title}</div>`).join('')
+        : '<p style="color: #999;">No pending items</p>';
+    
+    // Recent activity
+    const recent = issues.slice(0, 5).map(i => `<div style="padding: 10px; border-bottom: 1px solid #eee;"><strong>#${i.number}:</strong> ${i.title}<br><small style="color: #999;">${new Date(i.created_at).toLocaleDateString()}</small></div>`).join('');
+    document.getElementById('recentActivity').innerHTML = recent || '<p style="color: #999;">No recent activity</p>';
+}
+
+// Load approvals
+async function loadApprovals() {
+    const issues = await githubAPI('/repos/' + config.repoUrl + '/issues');
+    if (!issues) return;
+    
+    const decidePending = issues.filter(i => i.labels.some(l => l.name === 'tier:decide') && i.state === 'open');
+    
+    let html = '';
+    for (const issue of decidePending) {
+        html += `
+        <div class="approval-item">
+            <div class="card-title">#${issue.number}: ${issue.title}</div>
+            <div class="approval-content">
+                ${issue.body}
+            </div>
+            <div class="approval-actions">
+                <button class="btn btn-success btn-small" onclick="approveDecision(${issue.number})">✓ Approve</button>
+                <button class="btn btn-secondary btn-small" onclick="requestChanges(${issue.number})">↩ Request Changes</button>
+                <button class="btn btn-danger btn-small" onclick="rejectDecision(${issue.number})">✗ Reject</button>
+            </div>
+        </div>`;
+    }
+    
+    document.getElementById('approvalsList').innerHTML = html || '<p style="color: #999;">No decisions pending</p>';
+}
+
+// Approval actions
+async function approveDecision(issueNumber) {
+    const comment = await githubAPI('/repos/' + config.repoUrl + '/issues/' + issueNumber + '/comments', 'POST', {
+        body: '✅ **APPROVED** via LOOM Dashboard'
+    });
+    
+    if (comment) {
+        await githubAPI('/repos/' + config.repoUrl + '/issues/' + issueNumber, 'PATCH', { state: 'closed' });
+        showAlert('Decision approved! Issue #' + issueNumber + ' closed.', 'success', 'approvalsAlerts');
+        loadApprovals();
+    }
+}
+
+async function requestChanges(issueNumber) {
+    const reason = prompt('Reason for requesting changes:');
+    if (!reason) return;
+    
+    await githubAPI('/repos/' + config.repoUrl + '/issues/' + issueNumber + '/comments', 'POST', {
+        body: '🔄 **CHANGES REQUESTED** via LOOM Dashboard\n\n' + reason
+    });
+    
+    showAlert('Changes requested for issue #' + issueNumber, 'info', 'approvalsAlerts');
+}
+
+async function rejectDecision(issueNumber) {
+    const reason = prompt('Reason for rejection:');
+    if (!reason) return;
+    
+    await githubAPI('/repos/' + config.repoUrl + '/issues/' + issueNumber + '/comments', 'POST', {
+        body: '❌ **REJECTED** via LOOM Dashboard\n\n' + reason
+    });
+    
+    await githubAPI('/repos/' + config.repoUrl + '/issues/' + issueNumber, 'PATCH', { state: 'closed' });
+    showAlert('Decision rejected and issue #' + issueNumber + ' closed.', 'danger', 'approvalsAlerts');
+    loadApprovals();
+}
+
+// Load Monday Brief
+async function loadMondayBrief() {
+    const issues = await githubAPI('/repos/' + config.repoUrl + '/issues');
+    if (!issues) return;
+    
+    const decidePending = issues.filter(i => i.labels.some(l => l.name === 'tier:decide') && i.state === 'open');
+    const reviewPending = issues.filter(i => i.labels.some(l => l.name === 'tier:review') && i.state === 'open');
+    
+    let html = `<div class="alert alert-info">📅 This week's priority items</div>`;
+    
+    html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">⚡ Decisions Required (${decidePending.length})</h3>`;
+    html += decidePending.map(i => `<div style="padding: 10px; background: #f8f9fa; margin: 5px 0; border-radius: 4px;"><strong>#${i.number}:</strong> ${i.title}</div>`).join('');
+    
+    html += `<h3 style="margin-top: 20px; margin-bottom: 10px;">📌 Reviews (${reviewPending.length})</h3>`;
+    html += reviewPending.slice(0, 3).map(i => `<div style="padding: 10px; background: #f8f9fa; margin: 5px 0; border-radius: 4px;"><strong>#${i.number}:</strong> ${i.title}</div>`).join('');
+    
+    document.getElementById('briefingContent').innerHTML = html;
+}
+
+// Load projects
+async function loadProjects() {
+    const issues = await githubAPI('/repos/' + config.repoUrl + '/issues');
+    if (!issues) return;
+    
+    const projects = issues.filter(i => i.labels.some(l => l.name.startsWith('project:')));
+    
+    let html = projects.length > 0 
+        ? projects.map(p => `<div class="project-tile"><strong>#${p.number}:</strong> ${p.title}<br><small style="color: #999;">${p.state}</small></div>`).join('')
+        : '<p style="color: #999;">No projects found. Create issues with "project:" label to list here.</p>';
+    
+    document.getElementById('projectsList').innerHTML = html;
+}
+
+// Utility: Show alerts
+function showAlert(message, type, elementId) {
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type}`;
+    alert.textContent = message;
+    const container = document.getElementById(elementId);
+    container.appendChild(alert);
+    setTimeout(() => alert.remove(), 5000);
+}
+
+// Refresh button
+document.getElementById('refreshBtn').addEventListener('click', () => {
+    loadDashboard();
+    loadApprovals();
+    showAlert('Synced with GitHub', 'success', 'dashboardAlerts');
+});
+
+// Initialize
+loadConfig();
+loadDashboard();
+
+// Auto-refresh
+setInterval(() => {
+    if (config.autoRefresh) {
+        loadDashboard();
+    }
+}, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
