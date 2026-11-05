@@ -1,0 +1,21 @@
+# LOOM portfolio - one entry per product/platform. Reviewed monthly, decided quarterly.
+products:
+  - id: P1
+    name: "PRISM: Microsoft"
+    kind: product            # product | platform
+    serves: { bet: B1, objective: "[O1.x]" }
+    stage: dev
+    customers: "[TBD: first internal audience]"
+    value_measure: "[TBD]"
+    monthly_cost: "[TBD]"
+    recommendation: "[start | stop | scale | sustain]"
+    repo_home: "Masco environment (LOOM holds sanitised pattern only)"
+  - id: P2
+    name: mosaic-book
+    kind: platform
+    serves: { bet: B1, objective: "[O1.x]" }
+    stage: dev
+    customers: "[TBD]"
+    value_measure: "[TBD]"
+    monthly_cost: "[TBD]"
+    recommendation: "[start | stop | scale | sustain]"

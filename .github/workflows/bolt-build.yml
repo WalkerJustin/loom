@@ -1,0 +1,35 @@
+# Builds the BOLT dashboard (GitHub Pages) - deterministic, no AI, runs in minutes.
+# Triggers: any project pulse, any change to LOOM strategy/registry/signals, and nightly as a safety net.
+name: bolt-build
+on:
+  repository_dispatch:
+    types: [loom-pulse]
+  push:
+    branches: [main]
+    paths: ["strategy/**", "registry/**", "signals/**", "canon/**", "ideas/**"]
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Gather briefs from project repos
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_READ_TOKEN }}
+        run: |
+          mkdir -p _data/briefs
+          for repo in $(yq '.repos[] | select(.adoption >= 2) | .name' registry/repos.yaml); do
+            gh api repos/${{ github.repository_owner }}/$repo/contents/.loom/brief.md \
+              -H "Accept: application/vnd.github.raw" > _data/briefs/$repo.md || echo "missing: $repo"
+          done
+      - name: Build dashboard
+        run: echo "TODO - static site generator reads strategy/, signals/, registry/, _data/briefs/ and computes coverage + gaps"
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+      - uses: actions/deploy-pages@v4

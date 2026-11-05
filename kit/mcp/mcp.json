@@ -1,0 +1,13 @@
+{
+  "//": "LOOM standard MCP config. Copy to .vscode/mcp.json in LOOM and every project repo. Remote GitHub MCP server: hosted, always current, OAuth in VS Code. Read-only by default; flip X-MCP-Readonly to false only in a repo whose autonomy level allows writes.",
+  "servers": {
+    "github": {
+      "type": "http",
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "X-MCP-Readonly": "true",
+        "X-MCP-Toolsets": "repos,issues,pull_requests,actions,code_security,dependabot,secret_protection,projects"
+      }
+    }
+  }
+}

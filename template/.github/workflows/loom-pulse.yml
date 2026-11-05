@@ -1,0 +1,34 @@
+# LOOM pulse - standard (non-agentic) workflow in every project repo.
+# 1) checks the brief is valid and fresh, 2) tells LOOM to refresh the dashboard within minutes.
+name: loom-pulse
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "0 9 * * *"
+permissions:
+  contents: read
+jobs:
+  brief-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate .loom/brief.md
+        run: |
+          test -f .loom/brief.md || { echo "::error::.loom/brief.md missing"; exit 1; }
+          updated=$(grep -m1 '^updated:' .loom/brief.md | awk '{print $2}')
+          age=$(( ( $(date +%s) - $(date -d "$updated" +%s) ) / 86400 ))
+          echo "Brief age: $age days"
+          if [ "$age" -gt 14 ]; then echo "::warning::LOOM brief is $age days old"; fi
+  notify-loom:
+    if: github.event_name == 'push'
+    needs: brief-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping LOOM
+        env:
+          GH_TOKEN: ${{ secrets.LOOM_DISPATCH_TOKEN }}   # fine-grained PAT: LOOM repo only, Contents read/write
+        run: |
+          gh api repos/${{ github.repository_owner }}/loom/dispatches \
+            -f event_type=loom-pulse -f "client_payload[repo]=${{ github.repository }}"

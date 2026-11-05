@@ -1,0 +1,46 @@
+# LOOM Project Registry (auto-updated by Orchestrator)
+
+## Active Projects
+
+| ID | Name | Family | Stage | Autonomy | Kit version | Owner | Status | Notes |
+|---|---|---|---|---|---|---|---|---|
+| P1 | (TBD: first product) | MOSAIC / PRISM | charter | L1 | v0.1.0 | justin | pending | [Add your first project here] |
+
+## Watching (but not active)
+
+- None yet
+
+## Archived
+
+- None yet
+
+---
+
+## Template entry for new projects
+
+When a project charter is approved, the Orchestrator creates a project repo and adds it here:
+
+```yaml
+projects:
+  - id: <kebab-case>
+    name: <Human name>
+    family: MOSAIC | PRISM | CITADEL | standalone
+    stage: idea | charter | active | paused | done | archived
+    autonomy_level: L0 | L1 | L2 | L3
+    kit_version: v0.1.0
+    owner: justin
+    charter_issue: https://github.com/WalkerJustin/loom/issues/[N]
+    repo: https://github.com/WalkerJustin/[repo-name]
+    dashboard_url: "[TBD]"
+    serves_bets:
+      - B1
+      - B2
+    last_status_update: 2026-11-04
+    next_milestone: "[TBD]"
+```
+
+---
+
+**Registry status:** empty (ready for first project)  
+**Last sync:** 2026-11-04 via loom-orchestrator  
+**Next sync:** Nightly

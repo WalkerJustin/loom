@@ -1,0 +1,53 @@
+# LOOM project manifest - annotated example (v0.1, ideation)
+# Lives at .loom/project.yaml in every project repo. Validated at Heddle 1.
+
+loom:
+  kit_version: v0.1.0            # pinned; sync workflow opens PRs for newer versions
+  manifest_version: 1
+
+project:
+  id: mosaic-book                # repo name, kebab-case
+  name: mosaic-book
+  one_liner: Docs-as-code renderer for the MOSAIC book (HTML, docx, pptx from Markdown)
+  family: MOSAIC                 # MOSAIC | PRISM | CITADEL | standalone
+  stage: charter                 # idea | charter | active | paused | done | archived
+  owner: justin
+
+intent:
+  problem: "[TBD: one paragraph]"
+  success_measure: "[TBD: how we know it worked, observable]"
+  out_of_scope:
+    - "[TBD]"
+
+governance:
+  autonomy_level: L1             # L0 advise | L1 draft | L2 routine | L3 delegated
+  heddles:                       # gates Justin approves for this project
+    - charter
+    - merge
+  auto_merge_paths: []           # only used at L2+, e.g. ["docs/**"]
+  data_classification: personal # personal | internal | confidential - drives guardrails
+  secrets_allowed: false
+
+agents:
+  orchestrator: kit/agents/project-orchestrator.agent.md
+  specialists:                   # inherited from kit unless overridden locally
+    - plan
+    - build
+    - test
+    - review
+  local_overrides: []            # paths under .github/agents/ that intentionally diverge
+
+quality:
+  definition_of_done: contract/definition-of-done.md
+  evals:
+    - kit/evals/baseline.yaml    # every project
+    # - evals/project-specific.yaml
+
+reporting:
+  status_file: .loom/status.json   # emitted by CI, rolled up nightly to the bolt
+  cadence: weekly                     # how often the orchestrator writes a status note
+  retro: per-milestone                # retros feed canon/kit proposals
+
+links:
+  charter_issue: "[TBD after handoff]"
+  dashboard: "[TBD]"

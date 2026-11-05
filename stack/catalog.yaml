@@ -1,0 +1,21 @@
+# LOOM stack catalog - approved components by BOM layer (Architect + Steward own this).
+# Products reference these IDs in the `bom` section of .loom/brief.md.
+# status: adopt | trial | assess | hold | retire
+components:
+  # L0 Ground
+  - { id: cmp.github-actions,   layer: L0, name: GitHub Actions runners,          status: adopt, owner: Architect, monthly_cost: "[TBD]" }
+  - { id: idn.fine-grained-pat, layer: L0, name: Fine-grained PATs (read-only),   status: adopt, owner: Steward }
+  # L1 Data
+  - { id: dat.public-feeds,     layer: L1, name: Public industry feeds,           status: adopt, owner: Architect, classification: public }
+  # L2 Models
+  - { id: mdl.copilot-default,  layer: L2, name: GitHub Copilot default models,   status: adopt, owner: Architect }
+  # L3 Tools & Context
+  - { id: mcp.github-remote,    layer: L3, name: Remote GitHub MCP server,        status: adopt, owner: Architect }
+  # L4 Agents & Orchestration
+  - { id: wf.gh-agentic,        layer: L4, name: GitHub Agentic Workflows,        status: trial, owner: Architect }
+  # L6 Delivery & Ops
+  - { id: ops.pages,            layer: L6, name: GitHub Pages (BOLT hosting),     status: adopt, owner: Operator }
+  # L7 Governance
+  - { id: gov.masco-boundary,   layer: L7, name: Personal vs. Masco data boundary, status: adopt, owner: Steward }
+  # L8-L9 Market
+  - { id: rev.monthly-review,   layer: L9, name: Monthly sales & value review,    status: adopt, owner: Market Lead }
